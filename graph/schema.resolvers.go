@@ -13,9 +13,9 @@ import (
 	"github.com/redjoker011/poke-api-go/graph/model"
 )
 
-func (r *queryResolver) Pokemons(ctx context.Context) (*model.Resource, error) {
+func (r *queryResolver) Pokemons(ctx context.Context, limit *int, offset *int) (*model.Resource, error) {
 	client := client.New()
-	resp, err := client.Fetch("pokemon")
+	resp, err := client.Fetch("pokemon", *offset, *limit)
 
 	if err != nil {
 		log.Fatal(err)

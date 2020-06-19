@@ -13,7 +13,7 @@ type Result {
 }
 
 type Query {
-  pokemons: Resource!
+  pokemons(limit: Int = 20, offset: Int = 20): Resource!
 }
 
 # type Mutation {
