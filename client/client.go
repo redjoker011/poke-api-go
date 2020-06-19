@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -33,9 +34,11 @@ func New() *PokeClient {
 	}
 }
 
-func (pc *PokeClient) Fetch(resource string) (Resource, error) {
+func (pc *PokeClient) Fetch(resource string, params ...int) (Resource, error) {
+	offset, limit := parseParams(params)
+	resourceUrl := fmt.Sprintf("%s?offset=%d&limit=%d", pc.BuildURL(resource), offset, limit)
 	result := Resource{}
-	resp, err := pc.client.Get(pc.BuildURL(resource))
+	resp, err := pc.client.Get(resourceUrl)
 
 	if err != nil {
 		return Resource{}, err
@@ -52,4 +55,15 @@ func (pc *PokeClient) Fetch(resource string) (Resource, error) {
 
 func (pc *PokeClient) BuildURL(resource string) string {
 	return BaseURL + resource
+}
+
+func parseParams(params []int) (offset, limit int) {
+	switch l := len(params); {
+	case l == 2:
+		limit = params[1]
+		fallthrough
+	case l >= 1:
+		offset = params[0]
+	}
+	return
 }
