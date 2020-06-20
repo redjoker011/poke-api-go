@@ -1,31 +1,29 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/redjoker011/poke-api-go/client"
 	"log"
 	"net/http"
+	"os"
+
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/redjoker011/poke-api-go/graph"
+	"github.com/redjoker011/poke-api-go/graph/generated"
 )
 
-func pokemonsHandler(w http.ResponseWriter, _ *http.Request) {
-	client := client.New()
-	resp, err := client.Fetch("pokemon")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	json.NewEncoder(w).Encode(resp)
-}
-
-func indexHandler(w http.ResponseWriter, _ *http.Request) {
-	fmt.Fprintf(w, "Welcome!")
-}
+const defaultPort = "3000"
 
 func main() {
-	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/", indexHandler)
-	router.HandleFunc("/pokemons", pokemonsHandler)
-	log.Fatal(http.ListenAndServe(":8081", router))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
+	}
+
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+
+	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	http.Handle("/query", srv)
+
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
