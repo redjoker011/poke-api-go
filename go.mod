@@ -1,3 +1,5 @@
+// +heroku install ./main.go
+// +heroku goVersion go1.13
 module github.com/redjoker011/poke-api-go
 
 go 1.13
